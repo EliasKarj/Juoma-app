@@ -12,7 +12,7 @@ import RulesPanel from "./components/RulesPanel.jsx";
 const STORAGE_KEY = "drink_app_data";
 
 function App() {
-  const [drinkTypes, setDrinkTypes] = useState(["Shot", "Olut", "Viini"]);
+  const [drinkTypes, setDrinkTypes] = useState([]);
   const [drinkers, setDrinkers] = useState([]);
   const [newDrinker, setNewDrinker] = useState("");
 
