@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import AddDrinkerForm from "./components/AddDrinkerForm.jsx";
 import AddDrinkTypeForm from "./components/AddDrinkTypeForm.jsx";
 import DrinkTypeManager from "./components/DrinkTypeManager.jsx";
 import DrinkTable from "./components/DrinkTable.jsx";
-import Clock from "./components/Timer.jsx";
-import styles from "./styles/styles.js";
 import Timer from "./components/Timer.jsx";
+import Ranking from "./components/Ranking.jsx";
+import styles from "./styles/styles.js";
 
 const STORAGE_KEY = "drink_app_data";
 
@@ -104,36 +105,43 @@ function App() {
   };
 
   return (
-    <div style={styles.container}>
-      <Timer />
+    <>
+      <h1 style={styles.header}>Juomapeli</h1>
+      <div style={styles.topNav}>
+       <Link to="/stats" style={styles.topLink}>
+        Näytä tilastot
+        </Link>
+    </div>
+      <div style={styles.container}>
+        <Timer />
+        <Ranking drinkers={drinkers} />
 
-      <h1>Juomapeli</h1>
+        <div style={styles.layoutWrapper}>
+          <div style={styles.leftColumn}>
+            <AddDrinkerForm
+              value={newDrinker}
+              onChange={setNewDrinker}
+              onAdd={addDrinker}
+            />
+            <AddDrinkTypeForm onAddType={addDrinkType} />
+            <DrinkTypeManager
+              drinkTypes={drinkTypes}
+              onRemove={removeDrinkType}
+            />
+          </div>
 
-      <div style={styles.layoutWrapper}>
-        <div style={styles.leftColumn}>
-          <AddDrinkerForm
-            value={newDrinker}
-            onChange={setNewDrinker}
-            onAdd={addDrinker}
-          />
-          <AddDrinkTypeForm onAddType={addDrinkType} />
-          <DrinkTypeManager
-            drinkTypes={drinkTypes}
-            onRemove={removeDrinkType}
-          />
-        </div>
-
-        <div style={styles.rightColumn}>
-          <DrinkTable
-            drinkers={drinkers}
-            drinkTypes={drinkTypes}
-            onAddDrink={addDrink}
-            onRemoveDrink={removeDrink}
-            onRemoveDrinker={removeDrinker}
-          />
+          <div style={styles.rightColumn}>
+            <DrinkTable
+              drinkers={drinkers}
+              drinkTypes={drinkTypes}
+              onAddDrink={addDrink}
+              onRemoveDrink={removeDrink}
+              onRemoveDrinker={removeDrinker}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

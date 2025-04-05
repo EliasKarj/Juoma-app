@@ -28,37 +28,60 @@ export default function DrinkTable({
               (a, b) => a + b,
               0
             );
+
             return (
               <tr key={drinker.name}>
                 <td>{drinker.name}</td>
+
                 {drinkTypes.map((type) => (
                   <td key={type}>{drinker.drinks[type] ?? 0}</td>
                 ))}
+
                 <td>{total}</td>
-                <td>
-                {drinkTypes.map((type) => (
-  <div key={type} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-    <span style={{ fontSize: "14px", minWidth: "70px", textAlign: "left" }}>{type}</span>
-    <button
-      onClick={() => onAddDrink(drinker.name, type)}
-      style={styles.smallButton}
-    >
-      +
-    </button>
-    <button
-      onClick={() => onRemoveDrink(drinker.name, type)}
-      style={styles.smallButton}
-    >
-      −
-    </button>
-  </div>
-))}
-                  <button
-                    onClick={() => onRemoveDrinker(drinker.name)}
-                    style={styles.deleteButton}
+
+                <td style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
                   >
-                    Poista juoja
-                  </button>
+                    {drinkTypes.map((type) => (
+                      <div
+                        key={type}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <span style={{ fontSize: "14px", minWidth: "70px", textAlign: "right" }}>
+                          {type}
+                        </span>
+                        <button
+                          onClick={() => onAddDrink(drinker.name, type)}
+                          style={styles.smallButton}
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => onRemoveDrink(drinker.name, type)}
+                          style={styles.smallButton}
+                        >
+                          −
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      onClick={() => onRemoveDrinker(drinker.name)}
+                      style={styles.deleteButton}
+                    >
+                      Poista juoja
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

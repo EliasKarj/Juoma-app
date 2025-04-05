@@ -1,3 +1,5 @@
+import { color, transform } from "framer-motion";
+
 const styles = {
     container: {
       fontFamily: "'Poppins', sans-serif",
@@ -14,6 +16,18 @@ const styles = {
       fontSize: "16px",
       lineHeight: "1.6",
     },
+    header: {
+        position: "absolute",
+        top: "10px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontSize: "28px",
+        color: "white",
+        fontFamily: "'Poppins', sans-serif",
+        zIndex: 999,
+        margin: 0,
+      },
+      
   
     form: {
         marginBottom: "20px",
@@ -143,6 +157,48 @@ const styles = {
         justifyContent: "center",
         gap: "8px",
       },
+      rankingBox: {
+        position: "fixed", 
+        top: "500px",
+        right: "20px", 
+        width: "220px",
+        backgroundColor: "#13294b",
+        borderRadius: "10px",
+        padding: "16px",
+        textAlign: "left",
+        color: "white",
+        fontSize: "15px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        zIndex: 999,
+      },
+      
+      rankingList: {
+        paddingLeft: "20px",
+        margin: 0,
+      },
+      
+      rankingItem: {
+        marginBottom: "8px",
+      },
+      topNav: {
+        position: "absolute",
+        top: "70px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 998
+      },
+      topLink:{
+        color: "white",
+        backgroundColor: "#1f6feb",
+        padding: "6px 12px",
+        borderRadius: "8px",
+        textDecoration: "none",
+        fontSize: "15px",
+        fontWeight: "bold",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+        transition: "background-color 0.2s",
+        fontFamily: "'Poppins', sans-serif",
+      }
       
       
       
