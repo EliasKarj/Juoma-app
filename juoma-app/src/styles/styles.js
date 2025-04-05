@@ -30,6 +30,7 @@ const styles = {
       
   
     form: {
+        marginTop: "30px",
         marginBottom: "20px",
         display: "flex",
         justifyContent: "center",

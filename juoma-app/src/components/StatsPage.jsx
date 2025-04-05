@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  BarChart,Bar,XAxis,YAxis,Tooltip,PieChart,Pie,Cell,Legend,} from "recharts";
 import styles from "../styles/styles";
+
 const loadData = () => {
   const saved = localStorage.getItem("drink_app_data");
   if (saved) {
@@ -10,14 +12,17 @@ const loadData = () => {
   }
   return { drinkers: [], drinkTypes: [] };
 };
+const colors = ["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#9467bd", "#8c564b"];
 
 export default function StatsPage() {
   const { drinkers, drinkTypes } = loadData();
-
-  const juojaData = drinkers.map((d) => ({
-    name: d.name,
-    total: Object.values(d.drinks).reduce((a, b) => a + b, 0),
-  }));
+  const juojaData = drinkers.map((drinker) => {
+    const row = { name: drinker.name };
+    for (const type of drinkTypes) {
+      row[type] = drinker.drinks[type] ?? 0;
+    }
+    return row;
+  });
 
   const typeTotals = {};
   drinkers.forEach((d) => {
@@ -25,24 +30,31 @@ export default function StatsPage() {
       typeTotals[type] = (typeTotals[type] || 0) + count;
     }
   });
+
   const tyyppiData = Object.entries(typeTotals).map(([type, total]) => ({
     name: type,
     value: total,
   }));
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#ff4444"];
-
   return (
     <div style={{ ...styles.container, paddingTop: "100px" }}>
-      <h2>Pelin Tilastot</h2>
+      <h2>📊 Pelin Tilastot</h2>
 
-      <div style={{ margin: "20px auto", maxWidth: "600px" }}>
-        <h3>Juojien kokonaismäärät</h3>
-        <BarChart width={500} height={300} data={juojaData}>
+      <div style={{ margin: "20px auto", maxWidth: "700px" }}>
+        <h3>Juojien juomamäärät tyypeittäin</h3>
+        <BarChart width={600} height={300} data={juojaData}>
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="total" fill="#1f6feb" />
+          <Legend />
+          {drinkTypes.map((type, i) => (
+            <Bar
+              key={type}
+              dataKey={type}
+              stackId="a"
+              fill={colors[i % colors.length]}
+            />
+          ))}
         </BarChart>
       </div>
 
