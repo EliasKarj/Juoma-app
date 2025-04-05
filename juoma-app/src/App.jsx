@@ -1,118 +1,138 @@
-// App.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import AddDrinkerForm from "./components/AddDrinkerForm.jsx";
+import AddDrinkTypeForm from "./components/AddDrinkTypeForm.jsx";
+import DrinkTypeManager from "./components/DrinkTypeManager.jsx";
+import DrinkTable from "./components/DrinkTable.jsx";
+import Clock from "./components/Timer.jsx";
+import styles from "./styles/styles.js";
+import Timer from "./components/Timer.jsx";
+
+const STORAGE_KEY = "drink_app_data";
 
 function App() {
+  const [drinkTypes, setDrinkTypes] = useState(["Shot", "Olut", "Viini"]);
   const [drinkers, setDrinkers] = useState([]);
-  const [drinkTasks, setDrinkTasks] = useState([]);
+  const [newDrinker, setNewDrinker] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setDrinkTypes(parsed.drinkTypes || []);
+      setDrinkers(parsed.drinkers || []);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ drinkTypes, drinkers })
+    );
+  }, [drinkTypes, drinkers]);
 
   const addDrinker = (name) => {
-    if (name && !drinkers.includes(name)) {
-      setDrinkers([...drinkers, name]);
+    if (name && !drinkers.find((d) => d.name === name)) {
+      const newEntry = {
+        name,
+        drinks: drinkTypes.reduce((acc, type) => {
+          acc[type] = 0;
+          return acc;
+        }, {}),
+      };
+      setDrinkers([...drinkers, newEntry]);
+      setNewDrinker("");
     }
   };
 
-  const addDrinkTask = (drinker, task) => {
-    if (drinker && task) {
-      setDrinkTasks([...drinkTasks, { drinker, task }]);
+  const removeDrinker = (name) => {
+    setDrinkers(drinkers.filter((d) => d.name !== name));
+  };
+
+  const addDrink = (drinkerName, drinkType) => {
+    setDrinkers((prev) =>
+      prev.map((d) =>
+        d.name === drinkerName
+          ? {
+              ...d,
+              drinks: {
+                ...d.drinks,
+                [drinkType]: d.drinks[drinkType] + 1,
+              },
+            }
+          : d
+      )
+    );
+  };
+
+  const removeDrink = (drinkerName, drinkType) => {
+    setDrinkers((prev) =>
+      prev.map((d) =>
+        d.name === drinkerName
+          ? {
+              ...d,
+              drinks: {
+                ...d.drinks,
+                [drinkType]: Math.max(d.drinks[drinkType] - 1, 0),
+              },
+            }
+          : d
+      )
+    );
+  };
+
+  const addDrinkType = (newType) => {
+    if (!drinkTypes.includes(newType)) {
+      setDrinkTypes([...drinkTypes, newType]);
+      setDrinkers((prev) =>
+        prev.map((d) => ({
+          ...d,
+          drinks: { ...d.drinks, [newType]: 0 },
+        }))
+      );
     }
   };
 
-  return (
-    <div>
-      <h1>Juomatehtävä App</h1>
-      <AddDrinkerForm onAdd={addDrinker} />
-      <AddDrinkTaskForm drinkers={drinkers} onAdd={addDrinkTask} />
-      <DrinkList drinkTasks={drinkTasks} />
-      <DrinkSummary drinkTasks={drinkTasks} />
-    </div>
-  );
-}
-
-function AddDrinkerForm({ onAdd }) {
-  const [name, setName] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onAdd(name.trim());
-    setName("");
+  const removeDrinkType = (typeToRemove) => {
+    setDrinkTypes(drinkTypes.filter((t) => t !== typeToRemove));
+    setDrinkers((prev) =>
+      prev.map((d) => {
+        const updatedDrinks = { ...d.drinks };
+        delete updatedDrinks[typeToRemove];
+        return { ...d, drinks: updatedDrinks };
+      })
+    );
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="Juojan nimi"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button type="submit">Lisää juoja</button>
-    </form>
-  );
-}
+    <div style={styles.container}>
+      <Timer />
 
-function AddDrinkTaskForm({ drinkers, onAdd }) {
-  const [selectedDrinker, setSelectedDrinker] = useState("");
-  const [task, setTask] = useState("");
+      <h1>Juomapeli</h1>
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onAdd(selectedDrinker, task.trim());
-    setTask("");
-  };
+      <div style={styles.layoutWrapper}>
+        <div style={styles.leftColumn}>
+          <AddDrinkerForm
+            value={newDrinker}
+            onChange={setNewDrinker}
+            onAdd={addDrinker}
+          />
+          <AddDrinkTypeForm onAddType={addDrinkType} />
+          <DrinkTypeManager
+            drinkTypes={drinkTypes}
+            onRemove={removeDrinkType}
+          />
+        </div>
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <select
-        value={selectedDrinker}
-        onChange={(e) => setSelectedDrinker(e.target.value)}
-      >
-        <option value="">Valitse juoja</option>
-        {drinkers.map((d) => (
-          <option key={d} value={d}>
-            {d}
-          </option>
-        ))}
-      </select>
-      <input
-        placeholder="Juomatehtävä"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-      />
-      <button type="submit">Lisää tehtävä</button>
-    </form>
-  );
-}
-
-function DrinkList({ drinkTasks }) {
-  return (
-    <div>
-      <h2>Juomatehtävät</h2>
-      <ul>
-        {drinkTasks.map((item, index) => (
-          <li key={index}>
-            {item.drinker} - {item.task}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function DrinkSummary({ drinkTasks }) {
-  const summary = drinkTasks.reduce((acc, { drinker }) => {
-    acc[drinker] = (acc[drinker] || 0) + 1;
-    return acc;
-  }, {});
-
-  return (
-    <div>
-      <h2>Yhteenveto</h2>
-      <ul>
-        {Object.entries(summary).map(([drinker, count]) => (
-          <li key={drinker}>
-            {drinker}: {count} juomaa
-          </li>
-        ))}
-      </ul>
+        <div style={styles.rightColumn}>
+          <DrinkTable
+            drinkers={drinkers}
+            drinkTypes={drinkTypes}
+            onAddDrink={addDrink}
+            onRemoveDrink={removeDrink}
+            onRemoveDrinker={removeDrinker}
+          />
+        </div>
+      </div>
     </div>
   );
 }
