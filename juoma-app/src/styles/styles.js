@@ -199,7 +199,67 @@ const styles = {
         boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
         transition: "background-color 0.2s",
         fontFamily: "'Poppins', sans-serif",
-      }
+      },
+      rulesBox: {
+        position: "fixed",
+        top: "500px",
+        left: "20px",
+        width: "240px",
+        backgroundColor: "#13294b",
+        borderRadius: "10px",
+        padding: "16px",
+        textAlign: "left",
+        color: "white",
+        fontSize: "15px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        zIndex: 999,
+      },
+      
+      rulesList: {
+        paddingLeft: "10px",
+        margin: 0,
+      },
+      
+      rulesItem: {
+        marginBottom: "8px",
+      },
+      rulesEditorBox: {
+        backgroundColor: "#13294b",
+        padding: "30px",
+        borderRadius: "12px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        maxWidth: "600px",
+        width: "100%",
+        textAlign: "center",
+        color: "white",
+      },
+      
+      rulesEditorTitle: {
+        fontSize: "26px",
+        marginBottom: "20px",
+      },
+      
+      rulesEditorList: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        marginBottom: "20px",
+      },
+      
+      rulesEditorItem: {
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        paddingLeft: "170px",
+      },
+      
+      rulesEditorControls: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        alignItems: "center",
+      },
+      
       
       
       

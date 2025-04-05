@@ -7,6 +7,7 @@ import DrinkTable from "./components/DrinkTable.jsx";
 import Timer from "./components/Timer.jsx";
 import Ranking from "./components/Ranking.jsx";
 import styles from "./styles/styles.js";
+import RulesPanel from "./components/RulesPanel.jsx";
 
 const STORAGE_KEY = "drink_app_data";
 
@@ -113,6 +114,7 @@ function App() {
         </Link>
     </div>
       <div style={styles.container}>
+        <RulesPanel />
         <Timer />
         <Ranking drinkers={drinkers} />
 
