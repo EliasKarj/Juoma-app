@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/styles";
 
 export default function Timer() {
-  const [time, setTime] = useState(0); // millisekunnit
+  const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(() => {
-        setTime((prev) => prev + 10); // 10 ms välein
+        setTime((prev) => prev + 10);
       }, 10);
     } else {
       clearInterval(intervalRef.current);
@@ -22,7 +22,7 @@ export default function Timer() {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const seconds = String(totalSeconds % 60).padStart(2, "0");
-    const centis = String(Math.floor((ms % 1000) / 10)).padStart(2, "0"); // 2 desimaalia
+    const centis = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
     return `${minutes}:${seconds}:${centis}`;
   };
 
