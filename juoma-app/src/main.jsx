@@ -7,7 +7,7 @@ import RulesEditor from "./components/RulesEditor.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
+  <BrowserRouter basename='/Juoma-app/'>
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/stats" element={<StatsPage />} />
