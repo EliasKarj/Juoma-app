@@ -1,36 +1,132 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Routes, Route } from "react-router-dom";
 import AddDrinkerForm from "./components/AddDrinkerForm.jsx";
 import AddDrinkTypeForm from "./components/AddDrinkTypeForm.jsx";
 import DrinkTypeManager from "./components/DrinkTypeManager.jsx";
 import DrinkTable from "./components/DrinkTable.jsx";
 import Timer from "./components/Timer.jsx";
 import Ranking from "./components/Ranking.jsx";
-import styles from "./styles/styles.js";
 import RulesPanel from "./components/RulesPanel.jsx";
+import Room from "./components/Room.jsx";
+import RoomUsers from "./components/RoomUsers.jsx";
+import RulesEditor from "./components/RulesEditor.jsx";
+import styles from "./styles/styles.js";
 
-const STORAGE_KEY = "drink_app_data";
+import { db } from "./firebase";
+import { ref, set, onValue, remove } from "firebase/database";
 
-function App() {
+function AppContent() {
   const [drinkTypes, setDrinkTypes] = useState([]);
   const [drinkers, setDrinkers] = useState([]);
   const [newDrinker, setNewDrinker] = useState("");
 
+  const [userName, setUserName] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [joined, setJoined] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  const [timerState, setTimerState] = useState({ time: 0, isRunning: false });
+  const [rules, setRules] = useState([]);
+
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setDrinkTypes(parsed.drinkTypes || []);
-      setDrinkers(parsed.drinkers || []);
+    const savedRoomId = localStorage.getItem("currentRoomId");
+    const savedUserName = localStorage.getItem("currentUserName");
+
+    if (savedRoomId && savedUserName) {
+      setRoomId(savedRoomId);
+      setUserName(savedUserName);
+      setJoined(true);
     }
   }, []);
 
+  const handleLogin = () => {
+    const generatedUserId = `${userName}-${Math.floor(Math.random() * 100000)}`;
+    setUserId(generatedUserId);
+    setJoined(true);
+
+    localStorage.setItem("currentRoomId", roomId);
+    localStorage.setItem("currentUserName", userName);
+  };
+
+  const logout = () => {
+    if (roomId && userId) {
+      const userRef = ref(db, `rooms/${roomId}/users/${userId}`);
+      remove(userRef);
+    }
+
+    localStorage.removeItem("currentRoomId");
+    localStorage.removeItem("currentUserName");
+
+    setUserName("");
+    setRoomId("");
+    setUserId("");
+    setJoined(false);
+  };
+
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ drinkTypes, drinkers })
-    );
-  }, [drinkTypes, drinkers]);
+    if (!joined || !roomId) return;
+
+    const dataRef = ref(db, `rooms/${roomId}/data`);
+    const unsub = onValue(dataRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setDrinkTypes(data.drinkTypes || []);
+        setDrinkers(data.drinkers || []);
+      }
+      setDataLoaded(true);
+    });
+
+    return () => unsub();
+  }, [joined, roomId]);
+
+  useEffect(() => {
+    if (!joined || !roomId || !dataLoaded) return;
+
+    const dataRef = ref(db, `rooms/${roomId}/data`);
+    set(dataRef, {
+      drinkTypes,
+      drinkers,
+    });
+  }, [drinkTypes, drinkers, joined, roomId, dataLoaded]);
+
+  useEffect(() => {
+    if (!joined || !roomId) return;
+
+    const timerRef = ref(db, `rooms/${roomId}/timer`);
+    const unsub = onValue(timerRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setTimerState(data);
+      }
+    });
+
+    return () => unsub();
+  }, [joined, roomId]);
+
+  const updateTimerInFirebase = (newState) => {
+    if (!roomId) return;
+    const timerRef = ref(db, `rooms/${roomId}/timer`);
+    set(timerRef, newState);
+  };
+
+  useEffect(() => {
+    if (!joined || !roomId) return;
+
+    const rulesRef = ref(db, `rooms/${roomId}/rules`);
+    const unsub = onValue(rulesRef, (snapshot) => {
+      const data = snapshot.val();
+      setRules(data || []);
+    });
+
+    return () => unsub();
+  }, [joined, roomId]);
+
+  const updateRulesInFirebase = (newRules) => {
+    if (!roomId) return;
+    const rulesRef = ref(db, `rooms/${roomId}/rules`);
+    set(rulesRef, newRules);
+  };
 
   const addDrinker = (name) => {
     if (name && !drinkers.find((d) => d.name === name)) {
@@ -105,18 +201,85 @@ function App() {
     );
   };
 
+  if (!joined) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.header}>🍻 Juoma-app</h1>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (userName.trim() && roomId.trim()) {
+              handleLogin();
+            }
+          }}
+          style={styles.form}
+        >
+          <input
+            type="text"
+            placeholder="Nimesi"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <input
+            type="text"
+            placeholder="Huonekoodi"
+            value={roomId}
+            onChange={(e) => setRoomId(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <button type="submit" style={styles.button}>
+            Liity huoneeseen
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <>
-      <h1 style={styles.header}>Juomapeli</h1>
+      <button
+        onClick={logout}
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          backgroundColor: "#e53e3e",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          padding: "8px 14px",
+          fontSize: "14px",
+          cursor: "pointer",
+          fontWeight: "bold",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+          zIndex: 1000,
+        }}
+      >
+        Kirjaudu ulos
+      </button>
+
+      <h1 style={styles.header}>
+        Juomapeli – {roomId} ({userName})
+      </h1>
+
       <div style={styles.topNav}>
-       <Link to="/stats" style={styles.topLink}>
-        Näytä tilastot
+        <Link to="/stats" style={styles.topLink}>
+          Näytä tilastot
         </Link>
-    </div>
+        <Link to="/rules" style={{ ...styles.topLink, marginLeft: "10px" }}>
+          Muokkaa sääntöjä
+        </Link>
+      </div>
+
       <div style={styles.container}>
-        <RulesPanel />
-        <Timer />
+        <RulesPanel rules={rules} />
+        <Timer timerState={timerState} onTimerChange={updateTimerInFirebase} />
         <Ranking drinkers={drinkers} />
+        <RoomUsers roomId={roomId} />
+        <Room userName={userName} roomId={roomId} userId={userId} />
 
         <div style={styles.layoutWrapper}>
           <div style={styles.leftColumn}>
@@ -147,4 +310,11 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<AppContent />} />
+      <Route path="/rules" element={<RulesEditor />} />
+    </Routes>
+  );
+}

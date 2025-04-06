@@ -259,6 +259,21 @@ const styles = {
         gap: "10px",
         alignItems: "center",
       },
+      roomUsersBox: {
+        position: "fixed",
+        top: "700px",
+        right: "20px",
+        width: "220px",
+        backgroundColor: "#13294b",
+        borderRadius: "10px",
+        padding: "16px",
+        textAlign: "left",
+        color: "white",
+        fontSize: "15px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        zIndex: 998,
+      },
+      
       
       
       

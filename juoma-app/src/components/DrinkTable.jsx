@@ -24,17 +24,15 @@ export default function DrinkTable({
         </thead>
         <tbody>
           {drinkers.map((drinker) => {
-            const total = Object.values(drinker.drinks).reduce(
-              (a, b) => a + b,
-              0
-            );
+            const drinks = drinker.drinks || {}; // 🛡️ Turva: varmistetaan että drinks on objekti
+            const total = Object.values(drinks).reduce((a, b) => a + b, 0);
 
             return (
               <tr key={drinker.name}>
                 <td>{drinker.name}</td>
 
                 {drinkTypes.map((type) => (
-                  <td key={type}>{drinker.drinks[type] ?? 0}</td>
+                  <td key={type}>{drinks[type] ?? 0}</td> // 🛡️ varmistus
                 ))}
 
                 <td>{total}</td>
@@ -57,7 +55,13 @@ export default function DrinkTable({
                           gap: "6px",
                         }}
                       >
-                        <span style={{ fontSize: "14px", minWidth: "70px", textAlign: "right" }}>
+                        <span
+                          style={{
+                            fontSize: "14px",
+                            minWidth: "70px",
+                            textAlign: "right",
+                          }}
+                        >
                           {type}
                         </span>
                         <button

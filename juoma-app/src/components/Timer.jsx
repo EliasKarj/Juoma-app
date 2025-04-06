@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "../styles/styles";
 
-export default function Timer() {
-  const [time, setTime] = useState(0);
-  const [running, setRunning] = useState(false);
+export default function Timer({ timerState, onTimerChange }) {
+  const { time, isRunning } = timerState;
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (running) {
+    if (isRunning) {
       intervalRef.current = setInterval(() => {
-        setTime((prev) => prev + 10);
-      }, 10);
+        onTimerChange({ time: time + 10, isRunning: true });
+      }, 10); // 10 ms välein kuten alkuperäinen
     } else {
       clearInterval(intervalRef.current);
     }
 
     return () => clearInterval(intervalRef.current);
-  }, [running]);
+  }, [isRunning, time]);
 
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -30,13 +29,20 @@ export default function Timer() {
     <div style={styles.timer}>
       <div style={styles.timerTime}>⏱️ {formatTime(time)}</div>
       <div style={styles.timerControls}>
-        <button onClick={() => setRunning(true)} style={styles.button}>Start</button>
-        <button onClick={() => setRunning(false)} style={styles.button}>Stop</button>
         <button
-          onClick={() => {
-            setRunning(false);
-            setTime(0);
-          }}
+          onClick={() => onTimerChange({ time, isRunning: true })}
+          style={styles.button}
+        >
+          Start
+        </button>
+        <button
+          onClick={() => onTimerChange({ time, isRunning: false })}
+          style={styles.button}
+        >
+          Stop
+        </button>
+        <button
+          onClick={() => onTimerChange({ time: 0, isRunning: false })}
           style={styles.deleteButton}
         >
           Reset

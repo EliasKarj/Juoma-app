@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../styles/styles";
+import { db } from "../firebase";
+import { ref, onValue, set } from "firebase/database";
 
 export default function RulesEditor() {
   const [rules, setRules] = useState([]);
   const navigate = useNavigate();
+  const roomId = localStorage.getItem("currentRoomId");
 
   useEffect(() => {
-    const saved = localStorage.getItem("rules");
-    if (saved) {
-      setRules(JSON.parse(saved));
-    } else {
-      setRules([""]);
-    }
-  }, []);
+    if (!roomId) return;
+
+    const rulesRef = ref(db, `rooms/${roomId}/rules`);
+    const unsubscribe = onValue(rulesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setRules(data);
+      } else {
+        setRules([""]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [roomId]);
 
   const updateRule = (index, value) => {
     const updated = [...rules];
@@ -30,7 +40,9 @@ export default function RulesEditor() {
   };
 
   const saveRules = () => {
-    localStorage.setItem("rules", JSON.stringify(rules));
+    if (!roomId) return;
+    const rulesRef = ref(db, `rooms/${roomId}/rules`);
+    set(rulesRef, rules);
     navigate("/");
   };
 
@@ -38,7 +50,7 @@ export default function RulesEditor() {
     <div style={styles.container}>
       <div style={styles.rulesEditorBox}>
         <h2 style={styles.rulesEditorTitle}>✍️ Muokkaa Sääntöjä</h2>
-  
+
         <div style={styles.rulesEditorList}>
           {rules.map((rule, index) => (
             <div key={index} style={styles.rulesEditorItem}>
@@ -57,14 +69,19 @@ export default function RulesEditor() {
             </div>
           ))}
         </div>
-  
+
         <div style={styles.rulesEditorControls}>
-          <button onClick={addRule} style={styles.button}>+ Lisää sääntö</button>
-          <button onClick={saveRules} style={styles.button}>💾 Tallenna</button>
-          <Link to="/" style={styles.button}>← Takaisin</Link>
+          <button onClick={addRule} style={styles.button}>
+            + Lisää sääntö
+          </button>
+          <button onClick={saveRules} style={styles.button}>
+            💾 Tallenna
+          </button>
+          <Link to="/" style={styles.button}>
+            ← Takaisin
+          </Link>
         </div>
       </div>
     </div>
   );
-  
 }
